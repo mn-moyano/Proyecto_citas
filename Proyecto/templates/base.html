@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Clínica Dental D y A</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <header>
+        <h1>Clínica Dental D y A Odontología Especializada</h1>
+    </header>
+
+    <nav>
+        <a href="/">Inicio</a> |
+        <a href="/about">Acerca de</a> |
+        <a href="/pacientes">Pacientes</a> |
+        <a href="/citas">Citas</a> |
+        <a href="/facturas">Facturación</a>
+    </nav>
+
+    <hr>
+
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+
+    <hr>
+
+    <footer>
+        <p>&copy; 2026 Clínica Dental D y A - Todos los derechos reservados</p>
+    </footer>
+
+</body>
+</html>
