@@ -1,0 +1,26 @@
+<h2>Inventario de Insumos Odontológicos</h2>
+
+<a href="{{ url_for('agregar_producto') }}">Agregar Producto</a>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>Acciones</th>
+    </tr>
+{% for producto in inventario.values() %}
+    <tr>
+        <td>{{ producto.id }}</td>
+        <td>{{ producto.nombre }}</td>
+        <td>{{ producto.cantidad }}</td>
+        <td>{{ producto.precio }}</td>
+        <td>
+            <a href="{{ url_for('editar_producto', id=producto.id) }}">
+                Editar
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
