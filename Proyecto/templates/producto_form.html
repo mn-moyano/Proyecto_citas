@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Formulario Producto</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <p>
+        {{ form.nombre.label }} <br>
+        {{ form.nombre(size=40) }}
+    </p>
+
+    <p>
+        {{ form.descripcion.label }} <br>
+        {{ form.descripcion(size=60) }}
+    </p>
+
+    <p>
+        {{ form.cantidad.label }} <br>
+        {{ form.cantidad() }}
+    </p>
+
+    <p>
+        {{ form.precio.label }} <br>
+        {{ form.precio() }}
+    </p>
+
+    <p>
+        {{ form.submit() }}
+    </p>
+</form>
+
+{% endblock %}

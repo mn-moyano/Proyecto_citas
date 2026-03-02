@@ -1,20 +1,21 @@
 # Importamos Flask y render_template
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash
+from form import ProductoForm
+from inventario.bd import init_db, get_db_connection
+from inventario.inventario import Inventario
 import os
-
-#Importamos base de datos y modelo
-from base_datos import obtener_conexion, crear_tabla_productos
-from modelos import Producto
-
 # Creamos la aplicación
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'mi_clave_secreta'
 
 #Crear tabla al iniciar
-crear_tabla_productos()
+init_db()
+inventario = Inventario()
+inventario.cargar_desde_db()
 
 # Ruta principal → ahora renderiza index.html
 @app.route("/")
-def index():
+def inicio():
     return render_template("index.html")
 
 # Página Acerca de
@@ -37,44 +38,70 @@ def citas():
 def facturas():
     return render_template("facturas.html")
 
-#Inventario
-@app.route("/inventario")
-def inventario():
-    conn = obtener_conexion()
-    productos_db = conn.execute("SELECT * FROM productos").fetchall()
+#Ruta para listar productos
+@app.route('/productos')
+def productos_listar():
+    inventario.cargar_desde_db()
+    productos = list(inventario.productos.values())
+    return render_template('productos.html', productos=productos)
+
+#Nuevo producto
+@app.route("/productos/nuevo", methods=['GET', 'POST'])
+def producto_nuevo():
+    form = ProductoForm()
+    if form.validate_on_submit():
+        nombre = form.nombre.data
+        descripcion = form.descripcion.data
+        cantidad = form.cantidad.data
+        precio = form.precio.data
+        inventario.agregar_producto(nombre, descripcion, cantidad, precio)
+        flash('Producto agregado exitosamente', 'success')
+        return redirect(url_for('productos_listar'))
+    return render_template('producto_form.html', form=form)
+
+
+#Ruta para editar producto
+@app.route('/productos/editar/<int:id>', methods=['GET', 'POST'])
+def producto_editar(id):
+    producto = inventario.productos.get(id)
+    if not producto:
+        flash('Producto no encontrado', 'danger')
+        return redirect(url_for('productos_listar'))
+    
+    form = ProductoForm(obj=producto)
+    if form.validate_on_submit():
+        nombre = form.nombre.data
+        descripcion = form.descripcion.data
+        cantidad = form.cantidad.data
+        precio = form.precio.data
+        inventario.actualizar_producto(id, nombre, descripcion, cantidad, precio)
+        flash('Producto actualizado exitosamente', 'success')
+        return redirect(url_for('productos_listar'))
+    return render_template('producto_form.html', form=form, producto=producto)
+
+#Ruta para eliminar producto
+@app.route('/productos/eliminar/<int:id>', methods=['POST'])
+def producto_eliminar(id):
+    inventario.eliminar_producto(id)
+    flash('Producto eliminado exitosamente', 'success')
+    return redirect(url_for('productos_listar'))
+
+def listar_productos():
+    conn = get_db_connection()
+    productos = conn.execute('SELECT * FROM productos').fetchall()
     conn.close()
+    return productos
 
-    #Diccionario
-    inventario = {}
-    for fila in productos_db:
-        producto = Producto(
-            fila["id"],
-            fila["nombre"],
-            fila["cantidad"],
-            fila["precio"]
-        )
-        inventario[producto.id] = producto
+#Ruta clientes
+@app.route('/clientes')
+def clientes():
+    return 'Aquí puedes ver nuestros clientes'
 
-    return render_template("inventario.html", inventario = inventario)
+#Ruta formulario
+@app.route('/formulario')
+def formulario():
+    return 'producto_form.html'
 
-#Agregar producto
-@app.route("/agregar_producto", methods=["GET", "POST"])
-def agregar_producto():
-    if request.method == "POST":
-        nombre = request.form["nombre"]
-        cantidad = int(request.form["cantidad"])
-        precio = float(request.form["precio"])
-
-        conn = obtener_conexion()
-        conn.execute(
-            "INSERT INTO productos (nombre, cantidad, precio) VALUES (?, ?, ?)",
-            (nombre,cantidad, precio)
-        )
-        conn.commit()
-        conn.close()
-
-        return redirect(url_for("inventario"))
-    return render_template("agregar_producto.html")
 # Ejecutar aplicación
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

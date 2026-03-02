@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Inventario</h2>
+
+<a href="{{ url_for('producto_nuevo') }}">
+    <button>Nuevo Producto</button>
+</a>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>Acciones</th>
+    </tr>
+
+    {% for producto in productos %}
+    <tr>
+        <td>{{ producto.id }}</td>
+        <td>{{ producto.nombre }}</td>
+        <td>{{ producto.descripcion }}</td>
+        <td>{{ producto.cantidad }}</td>
+        <td>{{ producto.precio }}</td>
+        <td>
+            <a href="{{ url_for('producto_editar', id=producto.id) }}">
+                <button>Editar</button>
+            </a>
+
+            <form action="{{ url_for('producto_eliminar', id=producto.id) }}" method="POST" style="display:inline;">
+                <button type="submit">Eliminar</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
