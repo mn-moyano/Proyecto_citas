@@ -72,8 +72,8 @@ def producto_editar(id):
     if form.validate_on_submit():
         nombre = form.nombre.data
         descripcion = form.descripcion.data
-        cantidad = form.cantidad.data
-        precio = form.precio.data
+        cantidad = int(form.cantidad.data)
+        precio = float(form.precio.data)
         inventario.actualizar_producto(id, nombre, descripcion, cantidad, precio)
         flash('Producto actualizado exitosamente', 'success')
         return redirect(url_for('productos_listar'))
